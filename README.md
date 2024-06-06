@@ -8,8 +8,11 @@ Software dependence:
 2. Python >= 3.10
 
 Install Python dependence:
+```
 $ pip install bids numpy nibabel
+```
 
+Usage:
 ```shell
 usage: bold_denoise.py [-h] --bold_preprocess_dir BOLD_PREPROCESS_DIR --bold_preproc_file BOLD_PREPROC_FILE [--repetition_time REPETITION_TIME] [--freesurfer_home FREESURFER_HOME] [--subjects_dir SUBJECTS_DIR]
                        --bold_denoise_dir BOLD_DENOISE_DIR
