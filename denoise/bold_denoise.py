@@ -68,6 +68,7 @@ if __name__ == '__main__':
     assert os.environ.get('FREESURFER_HOME', None), "FREESURFER_HOME environment variable not set, please add --freesurfer_home /path/to/freesurfer"
 
     assert os.path.isdir(args.bold_preprocess_dir)
+    assert os.path.isfile(os.path.join(args.bold_preprocess_dir, 'dataset_description.json'))
     assert os.path.isfile(args.bold_preproc_file)
     assert args.bold_preproc_file.startswith(args.bold_preprocess_dir)
 
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     bold_preprocess_entities = {'extension': entities.get('extension'),
                                 'space': entities.get('space'),
                                 'suffix': 'bold'}
-    for entity in ['subject', 'session', 'run', 'task', 'preproc', 'res', 'hemi']:
+    for entity in ['subject', 'session', 'run', 'task', 'desc', 'res', 'hemi']:
         if entities.get(entity, None):
             bold_preprocess_entities[entity] = entities.get(entity)
     bold_preprocess_file = layout_pre.get(**bold_preprocess_entities)[0]
