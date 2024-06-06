@@ -1,4 +1,8 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# -------------------------------
+# @Author : Ning An        @Email : Ning An <ninganme0317@gmail.com>
+
 import os
 import argparse
 from bids import BIDSLayout
@@ -51,26 +55,36 @@ if __name__ == '__main__':
     # input
     parser.add_argument("--bold_preprocess_dir", required=True, help="DeepPrep BOLD result dir")
     parser.add_argument("--bold_preproc_file", required=True, help="DeepPrep preprocessed BOLD file path")
+    parser.add_argument("--repetition_time", required=False, help="RepetitionTime of BOLD file (optional)")
+    parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
+    parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)")
     # output
     parser.add_argument("--bold_denoise_dir", required=True, help="denoised BOLD file path")
-    parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
-    parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if space of BOLD is fsnative (optional)")
     args = parser.parse_args()
 
-    assert os.environ.get('FREESURFER_HOME', None), "FREESURFER_HOME environment variable not set, please add --freesurfer_home /path/to/freesurfer"
     if args.freesurfer_home:
         set_environ(os.path.join(args.freesurfer_home), args.subjects_dir)
+
+    assert os.environ.get('FREESURFER_HOME', None), "FREESURFER_HOME environment variable not set, please add --freesurfer_home /path/to/freesurfer"
 
     assert os.path.isdir(args.bold_preprocess_dir)
     assert os.path.isfile(args.bold_preproc_file)
     assert args.bold_preproc_file.startswith(args.bold_preprocess_dir)
 
     layout_pre = BIDSLayout(args.bold_preprocess_dir, validate=False)
-    TR = layout_pre.get_metadata(args.bold_preproc_file)['RepetitionTime']
+
+    if layout_pre.get_metadata(args.bold_preproc_file).get('RepetitionTime', None):
+        TR = layout_pre.get_metadata(args.bold_preproc_file)['RepetitionTime']
+    elif args.repetition_time:
+        TR = float(args.repetition_time)
+    else:
+        raise ValueError("Cant found TR info in metadata file, please set the TR parameter: --repetition_time <TR>")
+
     entities = layout_pre.parse_file_entities(args.bold_preproc_file)
 
     bold_preprocess_entities = {'extension': entities.get('extension'),
-                                'space': entities.get('space')}
+                                'space': entities.get('space'),
+                                'suffix': 'bold'}
     for entity in ['subject', 'session', 'run', 'task', 'preproc', 'res', 'hemi']:
         if entities.get(entity, None):
             bold_preprocess_entities[entity] = entities.get(entity)
