@@ -3,6 +3,18 @@
 ## denoise
 The code in **denoise** dir is for DeepPrep version >= **24.0.0** result.
 
+## processing steps
+Surface space： bandpass -> regression -> smooth fwhm-6
+Volume space：  bandpass -> regression
+
+.
+├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_bold.nii.gz
+├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-bandpass_bold.nii.gz
+├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-fwhm6_bold.nii.gz
+├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-regression_bold.nii.gz
+├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-bandpass_bold.nii.gz
+└── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-regression_bold.nii.gz
+
 ## Install (Docker)
 ```shell
 docker pull pbfslab/deepprep:postproc24.0.0
@@ -44,6 +56,8 @@ run example:
 ```shell
 
 # Surface space
+# bandpass -> regression -> smooth fwhm-6
+
 $ docker run -it --rm --user $(id -u):$(id -g) \
     -v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \
     pbfslab/deepprep:postproc24.0.0 \
@@ -53,6 +67,8 @@ $ docker run -it --rm --user $(id -u):$(id -g) \
     --bold_denoise_dir /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x_postproc-pbfslab
 
 # Volume space
+# bandpass -> regression
+
 $ docker run -it --rm --user $(id -u):$(id -g) \
     -v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \
     pbfslab/deepprep:postproc24.0.0 \
