@@ -6,7 +6,6 @@
 import os
 import argparse
 from bids import BIDSLayout
-from pathlib import Path
 
 from filters.filters import bandpass_nifti
 from regressors.regressors import glm_nifti
@@ -44,7 +43,6 @@ def fsaverage6_sm6(input_path, output_path, hemi):
     print(f'run: {cmd}')
     os.system(cmd)
     assert os.path.exists(output_path)
-    print(f'>>> {output_path}')
 
 
 if __name__ == '__main__':
@@ -53,13 +51,13 @@ if __name__ == '__main__':
     )
 
     # input
-    parser.add_argument("--bold_preprocess_dir", required=True, help="DeepPrep BOLD result dir")
-    parser.add_argument("--bold_preproc_file", required=True, help="DeepPrep preprocessed BOLD file path")
+    parser.add_argument("--bold_preprocess_dir", required=True, help="DeepPrep preprocessed BOLD dir")
+    parser.add_argument("--bold_preproc_file", required=True, help="preprocessed BOLD file json")
     parser.add_argument("--repetition_time", required=False, help="RepetitionTime of BOLD file (optional)")
     parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
     parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)")
     # output
-    parser.add_argument("--bold_denoise_dir", required=True, help="denoised BOLD file path")
+    parser.add_argument("--bold_denoise_dir", required=True, help="denoised dir path")
     args = parser.parse_args()
 
     if args.freesurfer_home:
@@ -70,57 +68,56 @@ if __name__ == '__main__':
     assert os.path.isdir(args.bold_preprocess_dir)
     assert os.path.isfile(os.path.join(args.bold_preprocess_dir, 'dataset_description.json'))
     assert os.path.isfile(args.bold_preproc_file)
-    assert args.bold_preproc_file.startswith(args.bold_preprocess_dir)
+
+    confounds_index_file = '/opt/DeepPrep/denoise/12motion_6param_10eCompCor.txt'
+
+    bold_preproc_file = args.bold_preproc_file
+    assert os.path.isfile(bold_preproc_file)
 
     layout_pre = BIDSLayout(args.bold_preprocess_dir, validate=False)
+    bold_preproc_file = layout_pre.get_file(bold_preproc_file)
 
-    if layout_pre.get_metadata(args.bold_preproc_file).get('RepetitionTime', None):
-        TR = layout_pre.get_metadata(args.bold_preproc_file)['RepetitionTime']
+    if layout_pre.get_metadata(bold_preproc_file.path).get('RepetitionTime', None):
+        TR = layout_pre.get_metadata(bold_preproc_file.path)['RepetitionTime']
     elif args.repetition_time:
         TR = float(args.repetition_time)
     else:
         raise ValueError("Cant found TR info in metadata file, please set the TR parameter: --repetition_time <TR>")
 
-    entities = layout_pre.parse_file_entities(args.bold_preproc_file)
+    entities = layout_pre.parse_file_entities(bold_preproc_file.path)
 
-    bold_preprocess_entities = {'extension': entities.get('extension'),
-                                'space': entities.get('space'),
-                                'suffix': 'bold'}
-    for entity in ['subject', 'session', 'run', 'task', 'desc', 'res', 'hemi']:
-        if entities.get(entity, None):
-            bold_preprocess_entities[entity] = entities.get(entity)
-    bold_preprocess_file = layout_pre.get(**bold_preprocess_entities)[0]
-
-    confounds_entities = {'desc': 'confounds'}
+    confounds_entities = {'desc': 'confounds', 'extension': '.tsv'}
     for entity in ['subject', 'session', 'run', 'task']:
         if entities.get(entity, None):
             confounds_entities[entity] = entities.get(entity)
     confounds_file = layout_pre.get(**confounds_entities)[0]
 
     # output
-    output_dir = os.path.join(args.bold_denoise_dir, os.path.dirname(bold_preprocess_file.relpath))
+    output_dir = os.path.join(args.bold_denoise_dir, 'BOLD', os.path.dirname(bold_preproc_file.relpath))
     os.makedirs(output_dir, exist_ok=True)
 
     if entities['extension'] == '.func.gii':
         # output
-        nii_file = os.path.join(output_dir, bold_preprocess_file.filename.replace('func.gii', 'nii.gz'))
+        nii_file = os.path.join(output_dir, bold_preproc_file.filename.replace('func.gii', 'nii.gz'))
         nii_file_name = os.path.basename(nii_file)
         bandpass_file = os.path.join(output_dir, nii_file_name.replace(f'_bold', f'_desc-bandpass_bold'))
         regression_file = os.path.join(output_dir, nii_file_name.replace(f'_bold', f'_desc-regression_bold'))
-        sm6_file = os.path.join(output_dir, nii_file_name.replace(f'_bold', f'_desc-postproc_bold'))
+        sm6_file = os.path.join(output_dir, nii_file_name.replace(f'_bold', f'_desc-fwhm6_bold'))
 
         def to_nii(_in_file, _output_file):
             _cmd = f'mri_convert {_in_file} {_output_file}'
             os.system(_cmd)
 
-        to_nii(bold_preprocess_file.path, nii_file)
+        to_nii(bold_preproc_file.path, nii_file)
         assert os.path.exists(nii_file)
+        print(f'>>> {nii_file}')
         bandpass_nifti(nii_file, bandpass_file, TR)
         assert os.path.exists(bandpass_file)
-        glm_nifti(bandpass_file, regression_file, Path(confounds_file))
+        print(f'>>> {bandpass_file}')
+        glm_nifti(confounds_index_file, bandpass_file, regression_file, confounds_file)
         assert os.path.exists(regression_file)
-
         print(f'>>> {regression_file}')
+
         if 'L' in os.path.basename(sm6_file):
             hemi = 'lh'
         elif 'R' in os.path.basename(sm6_file):
@@ -128,16 +125,18 @@ if __name__ == '__main__':
         else:
             raise ValueError(os.path.basename(sm6_file))
         fsaverage6_sm6(regression_file, sm6_file, hemi)
+        assert os.path.exists(sm6_file)
+        print(f'>>> {sm6_file}')
 
     elif entities['extension'] == '.nii.gz':
-        bandpass_file = os.path.join(output_dir, bold_preprocess_file.filename.replace('desc-preproc', 'desc-bandpass'))
-        regression_file = os.path.join(output_dir, bold_preprocess_file.filename.replace('desc-preproc', 'desc-postproc'))
+        bandpass_file = os.path.join(output_dir, bold_preproc_file.filename.replace('desc-preproc', 'desc-bandpass'))
+        regression_file = os.path.join(output_dir, bold_preproc_file.filename.replace('desc-preproc', 'desc-regression'))
 
-        bandpass_nifti(bold_preprocess_file.path, bandpass_file, TR)
+        bandpass_nifti(bold_preproc_file, bandpass_file, TR)
         assert os.path.exists(bandpass_file)
         print(f'>>> {bandpass_file}')
 
-        glm_nifti(bandpass_file, regression_file, Path(confounds_file))
+        glm_nifti(confounds_index_file, bandpass_file, regression_file, confounds_file)
         assert os.path.exists(regression_file)
         print(f'>>> {regression_file}')
     else:

@@ -68,7 +68,7 @@ def bandpass_nifti(gauss_path, bpss_path, tr):
 
     # Get and set parameters.
     nskip = 0
-    fhalf_lo = 0.0  # 1e-16  # make parameter the same to INDI_lab
+    fhalf_lo = 0.01  # 1e-16  # make parameter the same to INDI_lab
     fhalf_hi = 0.08
     band = [fhalf_lo, fhalf_hi]
     order = 2

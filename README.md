@@ -1,20 +1,25 @@
 # DeepPrep-Data-Analysis
 
 ## denoise
-The code in **denoise** dir is for DeepPrep **23.1.0** result.
+The code in **denoise** dir is for DeepPrep version >= **24.0.0** result.
 
-Software dependence:
-1. FreeSurfer >= 6.0.0
-2. Python >= 3.10
-
-Install Python dependence:
+## Install (Docker)
+```shell
+docker pull pbfslab/deepprep:postproc24.0.0
 ```
-$ pip install bids numpy nibabel
+
+for CN
+```shell
+docker pull registry.cn-beijing.aliyuncs.com/pbfslab/deepprep:postproc24.0.0
 ```
 
 Usage:
 ```shell
-usage: bold_denoise.py [-h] --bold_preprocess_dir BOLD_PREPROCESS_DIR --bold_preproc_file BOLD_PREPROC_FILE [--repetition_time REPETITION_TIME] [--freesurfer_home FREESURFER_HOME] [--subjects_dir SUBJECTS_DIR]
+$ docker run -it --rm --user $(id -u):$(id -g) \
+-v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \
+pbfslab/deepprep:postproc24.0.0 --help
+
+usage: [-h] --bold_preprocess_dir BOLD_PREPROCESS_DIR --bold_preproc_file BOLD_PREPROC_FILE [--repetition_time REPETITION_TIME] [--freesurfer_home FREESURFER_HOME] [--subjects_dir SUBJECTS_DIR]
                        --bold_denoise_dir BOLD_DENOISE_DIR
 
 DeepPrep: denise
@@ -22,9 +27,9 @@ DeepPrep: denise
 options:
   -h, --help            show this help message and exit
   --bold_preprocess_dir BOLD_PREPROCESS_DIR
-                        DeepPrep BOLD result dir
+                        DeepPrep preprocessed BOLD dir
   --bold_preproc_file BOLD_PREPROC_FILE
-                        DeepPrep preprocessed BOLD file path
+                        preprocessed BOLD file json
   --repetition_time REPETITION_TIME
                         RepetitionTime of BOLD file (optional)
   --freesurfer_home FREESURFER_HOME
@@ -32,24 +37,27 @@ options:
   --subjects_dir SUBJECTS_DIR
                         DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)
   --bold_denoise_dir BOLD_DENOISE_DIR
-                        denoised BOLD file path
+                        denoised dir path
 ```
 
 run example:
-```python
-$ cd denoise
+```shell
 
 # Surface space
-$ python3 bold_denoise.py --bold_preprocess_dir /DeepPrep_2310_Result/BOLD \
-    --bold_preproc_file /DeepPrep_2310_Result/BOLD/sub-MSC01/ses-func01/func/sub-MSC01_ses-func01_task-rest_hemi-L_space-fsnative_bold.func.gii \
-    --bold_denoise_dir /mnt/ngshare2/anning/workspace/DeepPrep-Data-Analysis/tmp/bold_denised_dir
+$ docker run -it --rm --user $(id -u):$(id -g) \
+    -v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \
+    pbfslab/deepprep:postproc24.0.0 \
+    --freesurfer_home /opt/freesurfer \
+    --bold_preprocess_dir /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x/BOLD \
+    --bold_preproc_file /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x/BOLD/sub-MSC01/ses-func01/func/sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_bold.func.gii \
+    --bold_denoise_dir /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x_postproc-pbfslab
 
 # Volume space
-$ python3 bold_denoise.py \ 
-    --bold_preprocess_dir /DeepPrep_2310_Result/BOLD \
-    --bold_preproc_file /DeepPrep_2310_Result/BOLD/sub-MSC01/ses-func01/func/sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-preproc_bold.nii.gz \
-    --bold_denoise_dir /mnt/ngshare2/anning/workspace/DeepPrep-Data-Analysis/tmp/bold_denised_dir \
-    --repetition_time 2.2
-
-
+$ docker run -it --rm --user $(id -u):$(id -g) \
+    -v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \
+    pbfslab/deepprep:postproc24.0.0 \
+    --freesurfer_home /opt/freesurfer \
+    --bold_preprocess_dir /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x/BOLD \
+    --bold_preproc_file /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x/BOLD/sub-MSC01/ses-func01/func/sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-preproc_bold.nii.gz \
+    --bold_denoise_dir /mnt/ngshare/DeepPrep/FastSurferUpdate/Result/MSC_recon-DP242x_preproc-DP242x_postproc-pbfslab
 ```
