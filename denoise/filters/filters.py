@@ -53,7 +53,7 @@ def _bandpass_nifti(fname, bpss_path, nskip, order, band, tr):
     nib.save(output, bpss_path)
 
 
-def bandpass_nifti(gauss_path, bpss_path, tr):
+def bandpass_nifti(gauss_path, bpss_path, tr, nskip=0, band=[0.01, 0.08]):
     '''
     Perform a bandpass filter on each voxel in each .nii.gz file listed,
     as lines, in :arg listfile:.
@@ -67,10 +67,8 @@ def bandpass_nifti(gauss_path, bpss_path, tr):
     '''
 
     # Get and set parameters.
-    nskip = 0
-    fhalf_lo = 0.01  # 1e-16  # make parameter the same to INDI_lab
-    fhalf_hi = 0.08
-    band = [fhalf_lo, fhalf_hi]
+    nskip = nskip
+    band = band
     order = 2
     _bandpass_nifti(gauss_path, bpss_path, nskip, order, band, tr)
     return bpss_path
