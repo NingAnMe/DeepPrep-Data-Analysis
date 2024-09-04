@@ -49,9 +49,10 @@ def fsaverage6_sm6(input_path, output_path, hemi, fwhm=6):
 def volume_smooth(input_path, output_path, fwhm=6):
     cmd = ' '.join([
                     'mri_fwhm',
-                    '--i ', input_path,
-                    '--o', output_path,
-                    '--fwhm', str(fwhm),
+                    '--i', input_path,
+                    f"--to-fwhm {fwhm} ",
+                    f"--o {output_path} ",
+                    f"--to-fwhm-tol 0.5"
                     ])
     print(f'run: {cmd}')
     os.system(cmd)
