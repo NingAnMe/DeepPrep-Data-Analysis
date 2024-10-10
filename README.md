@@ -5,27 +5,38 @@ The code in **denoise** dir is for DeepPrep version >= **24.0.0** result.
 
 ## processing steps
 Surface space： bandpass -> regression -> smooth(optional)
+
 Volume space：  bandpass -> regression -> smooth(optional)
 
 .
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-bandpass_bold.json
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-bandpass_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-fwhm_bold.json
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-fwhm_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-regression_bold.json
+
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-regression_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-bandpass_bold.json
+
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-bandpass_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-fwhm_bold.json
+
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-fwhm_bold.nii.gz
+
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-regression_bold.json
+
 └── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-regression_bold.nii.gz
 
 ## Install (Docker)
-```shell
-docker pull pbfslab/deepprep:postproc24.0.1
-```
 
 for CN
 ```shell
