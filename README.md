@@ -8,33 +8,26 @@ Surface space： bandpass -> regression -> smooth(optional)
 
 Volume space：  bandpass -> regression -> smooth(optional)
 
+```shell
+$ tree $BOLD_DENOISE_DIR
+
 .
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-bandpass_bold.json
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-bandpass_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-fwhm_bold.json
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-fwhm_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-regression_bold.json
-
 ├── sub-MSC01_ses-func01_task-rest_hemi-L_space-fsaverage6_desc-regression_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-bandpass_bold.json
-
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-bandpass_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-fwhm_bold.json
-
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-fwhm_bold.nii.gz
-
 ├── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-regression_bold.json
-
 └── sub-MSC01_ses-func01_task-rest_space-MNI152NLin6Asym_res-02_desc-regression_bold.nii.gz
+
+```
+
 
 ## Install (Docker)
 
@@ -90,7 +83,7 @@ $ docker run -it --rm --user $(id -u):$(id -g) \
     --fwhm 6
 
 # Volume space
-# bandpass -> regression
+# bandpass -> regression -> smooth fwhm-6 (optional)
 
 $ docker run -it --rm --user $(id -u):$(id -g) \
     -v /mnt:/mnt -v $FREESURFER_HOME:/opt/freesurfer \

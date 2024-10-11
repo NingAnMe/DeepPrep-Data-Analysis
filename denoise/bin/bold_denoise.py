@@ -67,6 +67,7 @@ if __name__ == '__main__':
     # input
     parser.add_argument("--bold_preprocess_dir", required=True, help="DeepPrep preprocessed BOLD dir")
     parser.add_argument("--bold_preproc_file", required=True, help="preprocessed BOLD file json")
+    parser.add_argument("--confounds_index_file", required=True, help="confounds_index_file")
     parser.add_argument("--repetition_time", required=False, help="RepetitionTime of BOLD file (optional)")
     parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
     parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)")
@@ -74,6 +75,7 @@ if __name__ == '__main__':
     parser.add_argument("--fwhm", required=False, help="(INT) using to smoothing file with fwhm (optional)", default=0)
     # output
     parser.add_argument("--bold_denoise_dir", required=True, help="denoised dir path")
+    parser.add_argument("--work_dir", required=True, help="work dir path")
     args = parser.parse_args()
 
     if args.freesurfer_home:
@@ -84,10 +86,14 @@ if __name__ == '__main__':
     assert os.path.isdir(args.bold_preprocess_dir)
     assert os.path.isfile(os.path.join(args.bold_preprocess_dir, 'dataset_description.json'))
     assert os.path.isfile(args.bold_preproc_file)
+    assert os.path.isfile(args.confounds_index_file)
 
-    confounds_index_file = '/opt/DeepPrep/denoise/12motion_6param_10eCompCor.txt'
+    confounds_index_file = args.confounds_index_file
 
-    bold_preproc_file = args.bold_preproc_file
+    with open(args.bold_preproc_file, 'r') as f:
+        bold_preproc_json = json.load(f)
+    bold_preproc_file = bold_preproc_json.get('bold_file', None)
+    bids_database_path = bold_preproc_json.get('bids_database_path', None)
     assert os.path.isfile(bold_preproc_file)
 
     layout_pre = BIDSLayout(args.bold_preprocess_dir, validate=False)
