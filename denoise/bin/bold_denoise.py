@@ -72,6 +72,7 @@ if __name__ == '__main__':
     parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
     parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)")
     parser.add_argument("--skip_frame", required=False, help="how many frames to skip before postprocessing? (optional)")
+    parser.add_argument("--bold_bandpass", required=True, help="BOLD bandpass range, default '0.01-0.08'")
     parser.add_argument("--fwhm", required=False, help="(INT) using to smoothing file with fwhm (optional)", default=0)
     # output
     parser.add_argument("--bold_denoise_dir", required=True, help="denoised dir path")
@@ -87,6 +88,13 @@ if __name__ == '__main__':
     assert os.path.isfile(os.path.join(args.bold_preprocess_dir, 'dataset_description.json'))
     assert os.path.isfile(args.bold_preproc_file)
     assert os.path.isfile(args.confounds_index_file)
+
+    bold_bandpass_low, bold_bandpass_high = args.bold_bandpass.split('-')
+    bold_bandpass_low = float(bold_bandpass_low)
+    bold_bandpass_high = float(bold_bandpass_high)
+    assert bold_bandpass_low > 0
+    assert bold_bandpass_high > 0
+    band = [bold_bandpass_low, bold_bandpass_high]
 
     confounds_index_file = args.confounds_index_file
 
@@ -117,8 +125,6 @@ if __name__ == '__main__':
     # output
     output_dir = os.path.join(args.bold_denoise_dir, 'BOLD', os.path.dirname(bold_preproc_file.relpath))
     os.makedirs(output_dir, exist_ok=True)
-
-    band = [0.01, 0.08]
 
     if entities['extension'] == '.func.gii':
         # output

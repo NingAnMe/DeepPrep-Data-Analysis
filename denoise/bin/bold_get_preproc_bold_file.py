@@ -5,6 +5,7 @@ import shutil
 
 from bids import BIDSLayout
 import json
+import uuid
 
 
 if __name__ == '__main__':
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         os.makedirs(args.work_dir)
     shutil.copyfile(os.path.join(args.bids_dir, 'dataset_description.json'), os.path.join(args.output_dir, 'dataset_description.json'))
 
-    database_path = os.path.join(args.work_dir, 'postprocess_bids_dir_layout_db')
+    database_path = os.path.join(args.work_dir, str(uuid.uuid4()))
     layout_bids = BIDSLayout(bids_dir, validate=False, database_path=database_path, reset_database=True)
 
     orig_entities = {
