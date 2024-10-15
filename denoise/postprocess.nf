@@ -48,7 +48,9 @@ process bold_postprocess {
     val(freesurfer_home)
     val(subjects_dir)
     val(skip_frame)
-    val(fwhm)
+    val(surface_fwhm)
+    val(volume_fwhm)
+    val(bandpass)
 
     val(output_dir)
     val(work_dir)
@@ -74,7 +76,9 @@ process bold_postprocess {
     ${freesurfer_home} \
     ${subjects_dir} \
     --skip_frame ${skip_frame} \
-    --fwhm ${fwhm} \
+    --surface_fwhm ${surface_fwhm} \
+    --volume_fwhm ${volume_fwhm} \
+    --bandpass ${bandpass} \
     --output_dir ${output_dir} \
     --work_dir ${work_dir}
     """
@@ -83,7 +87,8 @@ process bold_postprocess {
 
 workflow {
 
-    preprocess_bids_dir = params.preprocess_bids_dir
+    bids_dir = params.bids_dir
+    confounds_dir = params.confounds_dir
 
     subjects_dir = params.subjects_dir  // optional
     freesurfer_home = params.freesurfer_home  // optional
@@ -95,20 +100,22 @@ workflow {
     subject_id = params.subject_id  // optional
 
     skip_frame = params.skip_frame  // optional
-    surface_fwhm = params.fwhm  // optional
+    surface_fwhm = params.surface_fwhm  // optional
+    volume_fwhm = params.volume_fwhm  // optional
+    bandpass = params.bandpass  // optional
 
     output_dir = params.output_dir
 
     postprocess_bids_dir = "${output_dir}/BOLD"
     work_dir = "${output_dir}/WorkDir"
     if (confounds_dir.toString() == '') {
-        confounds_dir = params.preprocess_bids_dir
+        confounds_dir = params.bids_dir
     }
 
-    bold_orig_entities_file = bold_get_preproc_bold_file(preprocess_bids_dir, task_id, space, subject_id, postprocess_bids_dir, work_dir)
+    bold_orig_entities_file = bold_get_preproc_bold_file(bids_dir, task_id, space, subject_id, postprocess_bids_dir, work_dir)
     bold_orig_entities_file = bold_orig_entities_file.flatten().multiMap { it ->
                                                                         a: [it.name.split('_')[0], it.name, it] }
-    bold_postprocess_output = bold_postprocess(preprocess_bids_dir, bold_orig_entities_file,
+    bold_postprocess_output = bold_postprocess(bids_dir, bold_orig_entities_file,
                                                confounds_index_file, repetition_time, freesurfer_home, subjects_dir,
-                                               skip_frame, fwhm, postprocess_bids_dir, work_dir)
+                                               skip_frame, surface_fwhm, volume_fwhm, bandpass, postprocess_bids_dir, work_dir)
 }

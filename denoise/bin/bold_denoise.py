@@ -72,10 +72,11 @@ if __name__ == '__main__':
     parser.add_argument("--freesurfer_home", required=False, help="freesurfer home path (optional)")
     parser.add_argument("--subjects_dir", required=False, help="DeepPrep Recon dir is required if the space of BOLD is fsnative (optional)")
     parser.add_argument("--skip_frame", required=False, help="how many frames to skip before postprocessing? (optional)")
-    parser.add_argument("--bold_bandpass", required=True, help="BOLD bandpass range, default '0.01-0.08'")
-    parser.add_argument("--fwhm", required=False, help="(INT) using to smoothing file with fwhm (optional)", default=0)
+    parser.add_argument("--bandpass", required=True, help="BOLD bandpass range, default '0.01-0.08'")
+    parser.add_argument("--surface_fwhm", required=False, help="(INT) using to smoothing file with fwhm (optional)", default=0)
+    parser.add_argument("--volume_fwhm", required=False, help="(INT) using to smoothing file with fwhm (optional)", default=0)
     # output
-    parser.add_argument("--bold_denoise_dir", required=True, help="denoised dir path")
+    parser.add_argument("--output_dir", required=True, help="denoised dir path")
     parser.add_argument("--work_dir", required=True, help="work dir path")
     args = parser.parse_args()
 
@@ -89,12 +90,12 @@ if __name__ == '__main__':
     assert os.path.isfile(args.bold_preproc_file)
     assert os.path.isfile(args.confounds_index_file)
 
-    bold_bandpass_low, bold_bandpass_high = args.bold_bandpass.split('-')
-    bold_bandpass_low = float(bold_bandpass_low)
-    bold_bandpass_high = float(bold_bandpass_high)
-    assert bold_bandpass_low > 0
-    assert bold_bandpass_high > 0
-    band = [bold_bandpass_low, bold_bandpass_high]
+    bandpass_low, bandpass_high = args.bandpass.split('-')
+    bandpass_low = float(bandpass_low)
+    bandpass_high = float(bandpass_high)
+    assert bandpass_low > 0
+    assert bandpass_high > 0
+    band = [bandpass_low, bandpass_high]
 
     confounds_index_file = args.confounds_index_file
 
@@ -123,7 +124,7 @@ if __name__ == '__main__':
     confounds_file = layout_pre.get(**confounds_entities)[0]
 
     # output
-    output_dir = os.path.join(args.bold_denoise_dir, 'BOLD', os.path.dirname(bold_preproc_file.relpath))
+    output_dir = os.path.join(args.output_dir, os.path.dirname(bold_preproc_file.relpath))
     os.makedirs(output_dir, exist_ok=True)
 
     if entities['extension'] == '.func.gii':
@@ -169,7 +170,7 @@ if __name__ == '__main__':
         else:
             raise ValueError(os.path.basename(smooth_file))
 
-        fwhm = int(args.fwhm)
+        fwhm = int(args.surface_fwhm)
         if fwhm > 0:
             fsaverage6_sm6(regression_file, smooth_file, hemi, fwhm)
             assert os.path.exists(smooth_file)
@@ -202,7 +203,7 @@ if __name__ == '__main__':
             json.dump({'RepetitionTime': TR, 'confounds': confounds}, f, indent=4)
         print(f'>>> {regression_json_file}')
 
-        fwhm = int(args.fwhm)
+        fwhm = int(args.volume_fwhm)
         if fwhm > 0:
             volume_smooth(regression_file, smooth_file, fwhm)
             assert os.path.exists(smooth_file)

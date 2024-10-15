@@ -1,4 +1,8 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# -------------------------------
+# @Author : Ning An        @Email : Ning An <ninganme0317@gmail.com>
+
 import argparse
 import os.path
 import shutil
@@ -17,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument("--bids_dir", required=True, help="preprocessed BIDS directory")
     # input flags required
     parser.add_argument("--task_id", required=True, help="")
-    parser.add_argument("--space", required=True, help="")
+    parser.add_argument("--space", required=False, help="")
     # input flags optional
     parser.add_argument("--subject_id", required=False, help="")
     # output path
@@ -67,7 +71,7 @@ if __name__ == '__main__':
             continue
 
         bold_id = bold_orig_file.filename.split(extension)[0]
-        with open(bold_id, 'w') as f:
+        with open(bold_id + '.json', 'w') as f:
             data_json = {
                 'bold_file': bold_orig_file_path,
                 'bids_database_path': database_path
