@@ -1,6 +1,5 @@
 
 process bold_get_preproc_bold_file {
-    tag "${task_id}"
 
     cpus 1
     memory '2 GB'
@@ -17,14 +16,20 @@ process bold_get_preproc_bold_file {
     path "sub-*"  // file_path & bids_cache_database_path
     script:
     script_py = "bold_get_preproc_bold_file.py"
+    if (task_id.toString() != '') {
+        task_id = "--task_id ${task_id}"
+    }
+    if (space.toString() != '') {
+        space = "--space ${space}"
+    }
     if (subject_id.toString() != '') {
         subject_id = "--subject_id ${subject_id}"
     }
     """
     ${script_py} \
     --bids_dir ${preprocess_bids_dir} \
-    --task_id ${task_id} \
-    --space ${space} \
+    ${task_id} \
+    ${space} \
     ${subject_id} \
     --output_dir ${output_dir} \
     --work_dir ${work_dir}
@@ -114,7 +119,7 @@ workflow {
 
     bold_orig_entities_file = bold_get_preproc_bold_file(bids_dir, task_id, space, subject_id, postprocess_bids_dir, work_dir)
     bold_orig_entities_file = bold_orig_entities_file.flatten().multiMap { it ->
-                                                                        a: [it.name.split('_')[0], it.name, it] }
+                                                                        a: [it.name.split('_')[0], it.name.split('_bold.json')[0], it] }
     bold_postprocess_output = bold_postprocess(bids_dir, bold_orig_entities_file,
                                                confounds_index_file, repetition_time, freesurfer_home, subjects_dir,
                                                skip_frame, surface_fwhm, volume_fwhm, bandpass, postprocess_bids_dir, work_dir)

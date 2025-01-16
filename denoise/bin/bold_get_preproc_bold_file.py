@@ -20,10 +20,10 @@ if __name__ == '__main__':
     # input path required
     parser.add_argument("--bids_dir", required=True, help="preprocessed BIDS directory")
     # input flags required
-    parser.add_argument("--task_id", required=True, help="")
-    parser.add_argument("--space", required=False, help="")
+    parser.add_argument("--task_id", required=True, nargs='+', help="List of task IDs")
+    parser.add_argument("--space", required=False, nargs='+', help="List of spaces")
     # input flags optional
-    parser.add_argument("--subject_id", required=False, help="")
+    parser.add_argument("--subject_id", required=False, nargs='+', help="List of subject IDs")
     # output path
     parser.add_argument("--output_dir", required=True, help="")
     parser.add_argument("--work_dir", required=True, help="")
@@ -31,11 +31,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     """test
---bids_dir /mnt/ngshare/Data_User/xuna/denoise/ADXW026_MSYU2/Noise_DeepPrep_2410/BOLD
+--bids_dir /mnt/ngshare/DeepPrep/test_sample/ds004192_cifti/BOLD
 --task_id rest
---space fsaverage6
---output_dir /mnt/ngshare/Data_User/xuna/denoise/ADXW026_MSYU2/Noise_DeepPrep_2410_postprocess/BOLD
---work_dir /mnt/ngshare/Data_User/xuna/denoise/ADXW026_MSYU2/Noise_DeepPrep_2410_postprocess/WorkDir
+--space fsaverage6 MNI152NLin6Asym
+--output_dir /mnt/ngshare/DeepPrep/test_sample/ds004192_cifti_postprocess/BOLD
+--work_dir /mnt/ngshare/DeepPrep/test_sample/ds004192_cifti_postprocess/WorkDir
     """
 
     assert os.path.isdir(args.bids_dir)
@@ -56,19 +56,19 @@ if __name__ == '__main__':
 
     orig_entities = {
         'suffix': 'bold',
-        'space': args.space,
+        'extension': ['.nii.gz', '.func.gii']
     }
     if task_id:
         orig_entities['task'] = task_id
     if subject_id:
         orig_entities['subject'] = subject_id
+    if args.space:
+        orig_entities['space'] = args.space
     bold_orig_files = layout_bids.get(**orig_entities)
 
     for bold_orig_file in bold_orig_files:
         bold_orig_file_path = bold_orig_file.path
         extension = layout_bids.parse_file_entities(bold_orig_file_path)['extension']
-        if not extension in ('.nii.gz', '.func.gii'):
-            continue
 
         bold_id = bold_orig_file.filename.split(extension)[0]
         with open(bold_id + '.json', 'w') as f:
